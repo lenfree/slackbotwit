@@ -56,16 +56,20 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 				fmt.Printf("full response %+#v == %+#v\n", intent.Name, entity.Name)
 				if intent.Entity.Value == "pizza" && entity.Entity.Value != "" {
 					//msg.Reply(fmt.Sprintf("%s", response.Outcomes.Type[0].Value))
-					msg.Reply("you want pizza flavor %s", entity.Entity.Value)
-				} else {
-					msg.Reply("what flavor of pizza would you like?")
+					msg.ReplyMention("you want pizza flavor %s", entity.Entity.Value)
+					listen.Close()
+				} else if intent.Entity.Value == "pizza" && entity.Entity.Value == "" {
+					msg.ReplyMention("what flavor of pizza would you like?")
 					bot.Listen(&slick.Listener{
 						ListenDuration: 5 * time.Second,
 						FromUser:       msg.FromUser,
 						FromChannel:    msg.FromChannel,
 						MentionsMeOnly: true,
 						MessageHandlerFunc: func(listen *slick.Listener, msg *slick.Message) {
-							msg.Reply("you want pizza flavor %s", msg.Text)
+							msg.ReplyMention("I think you want pizza flavor %s", msg.Text)
+							listen.Close()
+						},
+						TimeoutFunc: func(listen *slick.Listener) {
 							listen.Close()
 						},
 					})
