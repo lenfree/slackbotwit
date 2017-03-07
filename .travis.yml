@@ -1,0 +1,14 @@
+language: go
+go:
+- 1.7
+deploy:
+  provider: releases
+  api_key:
+    secure: pfpaxtOFkBLhbl7ZgLBY7ymeiLo9vNGTOJmk6vOzCxBpJ3ySjxaoxMzXdd16cVX2YzjiYqHnxvOWPqn+EJyCYGSjB/uUmzL0pfauxiRJqN6p/YmE4+KgEtXJl+h0LIauL8HRMzcM3WfaThaK/Rc8PMqIOIdxFHr2UvMlhVnJur2WlFhuZXtdrkLb98J1EjoXaj2baz0Fw5kFFafkQTj2I7GUnLwL/ZsgY0k1u4bgKrE6aKVEgdNGh1BY0DKHV6oIa98ChQG0BMZD5HHTCfEf75cu0921hL0icugCTuNl4zv//BQZ2jncchtiQBIxfDM+dFl6c25jn3EGlB5YXbTgLCxcNLqxlGNi/2oxQo7Fc9ahrEd2JYYn0NsmHLh0ndz8OGvMN3GBxj7gJmdlb9KwoVgls3aJmZn7A4DKbJ/j+chLg6VwEMBXZSsHgzDLbqaFFqoMkiP/tgYihjVN4dmeQYTQqmS0yEWIl5pP7OjuorA4em/XrW161omdp8X6E0CAUTlGQ9R1Vslf6yEqTIK9g9ROrYciFaITxRdRLosXTkjgpnVTHNXlmjsA0U25YnGh1UU1oqGY9K6vlqe2kDByCjRU1cBqON2l3ShtJ4Lmx3/dB/zGCqskDhmLpEmMztReMxHvm74oEGb3iY3zR95nK6AdRSTETtrUM+o0TqYL9CA=
+  file:
+    - release/slackbotwit-linux-amd64
+    - release/slackbotwit-darwin-amd64
+    - release/slackbotwit-linux-arm
+  on:
+    repo: lenfree/slackbotwit
+    tags: true
