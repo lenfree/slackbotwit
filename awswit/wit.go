@@ -16,6 +16,21 @@ type intent struct {
 	Entity witai.EntityRes
 }
 
+type count struct {
+	Name   string
+	Entity witai.EntityRes
+}
+
+type entityType struct {
+	Name   string
+	Entity witai.EntityRes
+}
+
+type property struct {
+	Name   string
+	Entity witai.EntityRes
+}
+
 func newWit(token string) *witai.Client {
 	return witai.NewClient(token)
 }
@@ -34,26 +49,62 @@ func query(c *witai.Client, txt string) witai.Message {
 	return result
 }
 
-func parse(m witai.Message) (intent, entityName) {
+func parse(m witai.Message) (intent, entityName, count, entityType, property) {
 
 	var intention intent
 	var entity entityName
+	var number count
+	var enType entityType
+	var enProperty property
+
 	for key := range m.Outcomes {
-		if key == "intent" {
-			intention = intent{Name: key,
-				Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
-					Type:  m.Outcomes[key][0].Type,
-					Value: m.Outcomes[key][0].Value,
-				},
+		switch key {
+		case "intent":
+			{
+				intention = intent{Name: key,
+					Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
+						Type:  m.Outcomes[key][0].Type,
+						Value: m.Outcomes[key][0].Value,
+					},
+				}
 			}
-		} else {
-			entity = entityName{Name: key,
-				Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
-					Type:  m.Outcomes[key][0].Type,
-					Value: m.Outcomes[key][0].Value,
-				},
+		case "entity":
+			{
+				entity = entityName{Name: key,
+					Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
+						Type:  m.Outcomes[key][0].Type,
+						Value: m.Outcomes[key][0].Value,
+					},
+				}
+			}
+		case "count":
+			{
+				number = count{Name: key,
+					Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
+						Type:  m.Outcomes[key][0].Type,
+						Value: m.Outcomes[key][0].Value,
+					},
+				}
+			}
+		case "type":
+			{
+				enType = entityType{Name: key,
+					Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
+						Type:  m.Outcomes[key][0].Type,
+						Value: m.Outcomes[key][0].Value,
+					},
+				}
+			}
+		case "property":
+			{
+				enProperty = property{Name: key,
+					Entity: witai.EntityRes{Confidence: m.Outcomes[key][0].Confidence,
+						Type:  m.Outcomes[key][0].Type,
+						Value: m.Outcomes[key][0].Value,
+					},
+				}
 			}
 		}
 	}
-	return intention, entity
+	return intention, entity, number, enType, enProperty
 }
