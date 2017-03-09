@@ -3,6 +3,7 @@ package awswit
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/abourget/slick"
@@ -46,7 +47,7 @@ func (awswit *AwsWit) InitPlugin(bot *slick.Bot) {
 	awswit.config = conf.AwsWit
 }
 
-// ChatHandler handles direct messages bot or mentions bot
+// ChatHandler handles direct messages bot or mentions bot and route
 func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 	bot := listen.Bot
 
@@ -65,28 +66,16 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 				//	}()
 				//}
 				w := newWit(awswit.config.WitToken)
-				intent, entity, number, entityType, property := parse(query(w, msg.Text))
-				fmt.Printf("intent: %+#v\n", intent)
-				fmt.Printf("entity: %+#v\n", entity)
-				fmt.Printf("number: %+#v\n", number)
-				fmt.Printf("type: %+#v\n", entityType)
-				fmt.Printf("property: %+#v\n", property)
+				awsIntent := parse(query(w, msg.Text))
 
-				//fmt.Printf("full response %+#v == %+#v\n", intent.Name, entity.Name)
-				ec2List := getEC2List(newEC2(), entityType.Entity.Value)
-
-				for c, e := range ec2List.Reservations {
-					for _, i := range e.Instances {
-						for _, n := range i.NetworkInterfaces {
-							msg.ReplyMention("ip address for %s instance # %d: %v\n",
-								entityType.Entity.Value,
-								c+1,
-								*n.PrivateIpAddress)
-						}
-					}
+				if strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true {
+					awsEC2Handler(listen, msg, awsIntent)
 				}
-				fmt.Printf("%s\n", ec2List.GoString())
-				listen.Close()
+
+				if strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true {
+					awsEC2CountHandler(listen, msg, awsIntent)
+				}
+
 				//if intent.Entity.Value == "pizza" && entity.Entity.Value != "" {
 				//	//msg.Reply(fmt.Sprintf("%s", response.Outcomes.Type[0].Value))
 				//	msg.ReplyMention("you want pizza flavor %s", entity.Entity.Value)
@@ -110,4 +99,41 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 			},
 		})
 	}
+}
+
+func awsEC2Handler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	filter := awsEC2Filter{
+		Tag:   "tag:Name",
+		Value: e.EntityType.Entity.Value,
+	}
+
+	ec2List := getEC2List(newEC2(), filter)
+
+	for _, r := range ec2List.Reservations {
+		for c, i := range r.Instances {
+			for _, n := range i.NetworkInterfaces {
+				msg.ReplyMention("ip address for %s instance # %d: %v\n",
+					e.EntityType.Entity.Value,
+					c+1,
+					*n.PrivateIpAddress)
+			}
+		}
+	}
+	fmt.Printf("%s\n", ec2List.GoString())
+	listen.Close()
+}
+
+func awsEC2CountHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	filter := awsEC2Filter{Tag: "", Value: ""}
+
+	ec2List := getEC2List(newEC2(), filter)
+
+	count := 0
+	for _, r := range ec2List.Reservations {
+		for _ = range r.Instances {
+			count++
+		}
+	}
+	msg.Reply("number of EC2 instances either in running or pending state is: %d", count)
+	listen.Close()
 }

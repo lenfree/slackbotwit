@@ -6,6 +6,14 @@ import (
 	witai "github.com/lenfree/wit.ai-go"
 )
 
+type awsEntities struct {
+	EntityName entityName
+	Intent     intent
+	Count      count
+	EntityType entityType
+	Property   property
+}
+
 type entityName struct {
 	Name   string
 	Entity witai.EntityRes
@@ -49,7 +57,7 @@ func query(c *witai.Client, txt string) witai.Message {
 	return result
 }
 
-func parse(m witai.Message) (intent, entityName, count, entityType, property) {
+func parse(m witai.Message) awsEntities {
 
 	var intention intent
 	var entity entityName
@@ -106,5 +114,11 @@ func parse(m witai.Message) (intent, entityName, count, entityType, property) {
 			}
 		}
 	}
-	return intention, entity, number, enType, enProperty
+	return awsEntities{
+		Intent:     intention,
+		EntityName: entity,
+		Count:      number,
+		EntityType: enType,
+		Property:   enProperty,
+	}
 }
