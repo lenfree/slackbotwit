@@ -1,0 +1,19 @@
+{
+    "dependencies": {
+        "github.com/abourget/slick": {
+            "branch": "master"
+        },
+        "github.com/astaxie/beego": {
+            "branch": "master"
+        },
+        "github.com/aws/aws-sdk-go": {
+            "branch": "master"
+        },
+        "github.com/joho/godotenv": {
+            "branch": "master"
+        },
+        "github.com/lenfree/wit.ai-go": {
+            "branch": "master"
+        }
+    }
+}

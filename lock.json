@@ -1,0 +1,136 @@
+{
+    "memo": "a91d47e255a53955016897dccf42a29c300bcaec18edccbb425b150e9b50f895",
+    "projects": [
+        {
+            "name": "github.com/abourget/slick",
+            "branch": "master",
+            "revision": "89aa9d5f1a911d6c5d34c076da2b239a205a31a3",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/astaxie/beego",
+            "branch": "master",
+            "revision": "98740fddac7c5c0df83ea31b751a87e317d28163",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/aws/aws-sdk-go",
+            "branch": "master",
+            "revision": "d9caf90c8e590bdd2eaa074b1ff8c201dd56e57c",
+            "packages": [
+                "aws",
+                "aws/awserr",
+                "aws/session",
+                "service/ec2"
+            ]
+        },
+        {
+            "name": "github.com/boltdb/bolt",
+            "branch": "master",
+            "revision": "e9cf4fae01b5a8ff89d0ec6b32f0d9c9f79aefdd",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/go-ini/ini",
+            "version": "v1.25.3",
+            "revision": "7e015cd18f007383aa571cc413bd2ec09cff7f2d",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/gorilla/context",
+            "branch": "master",
+            "revision": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/gorilla/mux",
+            "branch": "master",
+            "revision": "599cba5e7b6137d46ddf58fb1765f5d928e69604",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/gorilla/securecookie",
+            "branch": "master",
+            "revision": "e59506cc896acb7f7bf732d4fdf5e25f7ccd8983",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/gorilla/sessions",
+            "branch": "master",
+            "revision": "ba78acc856fe7c79891d516131b3d903cc8d9367",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/jmespath/go-jmespath",
+            "version": "0.2.2",
+            "revision": "3433f3ea46d9f8019119e7dd41274e112a2359a9",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/joho/godotenv",
+            "branch": "master",
+            "revision": "4ed13390c0acd2ff4e371e64d8b97c8954138243",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/lenfree/wit.ai-go",
+            "branch": "master",
+            "revision": "c676f1e9e061b7f56d803baed98797fa141fd83c",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/nlopes/slack",
+            "branch": "master",
+            "revision": "e595e9d8590a04ff76407e4e7d1791d25b095c66",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/tuxychandru/pubsub",
+            "branch": "master",
+            "revision": "308ca2a9d8371528b36017db3c7eb669b34d9736",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "golang.org/x/net",
+            "branch": "master",
+            "revision": "6b27048ae5e6ad1ef927e72e437531493de612fe",
+            "packages": [
+                "websocket"
+            ]
+        },
+        {
+            "name": "golang.org/x/sys",
+            "branch": "master",
+            "revision": "075e574b89e4c2d22f2286a7e2b919519c6f3547",
+            "packages": [
+                "unix"
+            ]
+        }
+    ]
+}
