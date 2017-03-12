@@ -47,7 +47,6 @@ func query(c *witai.Client, txt string) witai.Message {
 	c.Verbose = true
 
 	fmt.Printf("Text: %s\n", txt)
-	// message
 	result, err := c.QueryMessage(txt, nil, "", "")
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())

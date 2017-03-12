@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// AwsWit contains slick related configuration
 type AwsWit struct {
 	bot    *slick.Bot
 	config WitConfig
@@ -72,7 +73,10 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 					awsEC2Handler(listen, msg, awsIntent)
 				}
 
-				if strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true {
+				if (strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true &&
+					strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) ||
+					(strings.Contains(awsIntent.Intent.Entity.Value, "number") == true &&
+						strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) {
 					awsEC2CountHandler(listen, msg, awsIntent)
 				}
 
@@ -128,12 +132,20 @@ func awsEC2CountHandler(listen *slick.Listener, msg *slick.Message, e awsEntitie
 
 	ec2List := getEC2List(newEC2(), filter)
 
-	count := 0
+	running := 0
+	pending := 0
 	for _, r := range ec2List.Reservations {
-		for _ = range r.Instances {
-			count++
+		for _, i := range r.Instances {
+			switch *i.State.Name {
+			case "running":
+				running++
+			case "pending":
+				pending++
+			}
 		}
 	}
-	msg.Reply("number of EC2 instances either in running or pending state is: %d", count)
+	fmt.Printf("total: %s\n", ec2List.Reservations)
+	msg.Reply("number of EC2 instances in running state is: %d", running)
+	msg.Reply("number of EC2 instances in pending state is: %d", pending)
 	listen.Close()
 }
