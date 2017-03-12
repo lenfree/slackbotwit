@@ -87,8 +87,14 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 					listNumberIntention, _ := regexp.MatchString("number.*|how many", msg.Text)
 					if listNumberIntention == true {
 						awsELBCountHandler(listen, msg, awsIntent)
-					} else {
+					}
+
+					if len(awsIntent.EntityType.Entity.Value) <= 0 {
 						awsELBHandler(listen, msg, awsIntent)
+					}
+
+					if len(awsIntent.EntityType.Entity.Value) > 0 {
+						awsELBNameHandler(listen, msg, awsIntent)
 					}
 				}
 
@@ -166,12 +172,7 @@ func awsEC2CountHandler(listen *slick.Listener, msg *slick.Message, e awsEntitie
 }
 
 func awsELBHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
-	filter := awsELBFilter{
-		Tag:   "tag:Name",
-		Value: e.EntityType.Entity.Value,
-	}
-
-	elbList := getELBList(newELB(), filter)
+	elbList := getELBList(newELB())
 	for _, elb := range elbList.LoadBalancerDescriptions {
 		msg.ReplyMention("ELB %s :\n ```%s``` ", *elb.LoadBalancerName, elb)
 		fmt.Printf("%s\n", elbList.GoString())
@@ -180,12 +181,17 @@ func awsELBHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
 }
 
 func awsELBCountHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
-	filter := awsELBFilter{
-		Tag:   "tag:Name",
-		Value: e.EntityType.Entity.Value,
-	}
-
-	elbList := getELBList(newELB(), filter)
+	elbList := getELBList(newELB())
 	msg.ReplyMention("# of ELBs in Sydney region ```%d```", len(elbList.LoadBalancerDescriptions))
+	listen.Close()
+}
+
+func awsELBNameHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	elb := getELBName(newELB(), e.EntityType.Entity.Value)
+	if elb != nil {
+		msg.ReplyMention("ELB ```%s`", elb.GoString())
+	} else {
+		msg.ReplyMention("ELB name %s not found", e.EntityType.Entity.Value)
+	}
 	listen.Close()
 }
