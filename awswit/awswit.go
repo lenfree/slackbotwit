@@ -3,6 +3,7 @@ package awswit
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -69,16 +70,26 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 				w := newWit(awswit.config.WitToken)
 
 				awsIntent := parse(query(w, msg.Text))
-
+				fmt.Println(awsIntent)
 				if strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true {
-					go awsEC2Handler(listen, msg, awsIntent)
+
+					if strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true ||
+						strings.Contains(awsIntent.Intent.Entity.Value, "number") == true {
+						awsEC2CountHandler(listen, msg, awsIntent)
+					} else {
+						awsEC2Handler(listen, msg, awsIntent)
+					}
 				}
 
-				if (strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true &&
-					strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) ||
-					(strings.Contains(awsIntent.Intent.Entity.Value, "number") == true &&
-						strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) {
-					go awsEC2CountHandler(listen, msg, awsIntent)
+				if strings.Contains(awsIntent.EntityName.Entity.Value, "load balancer") == true ||
+					strings.Contains(awsIntent.EntityName.Entity.Value, "elb") == true {
+
+					listNumberIntention, _ := regexp.MatchString("number.*|how many", msg.Text)
+					if listNumberIntention == true {
+						awsELBCountHandler(listen, msg, awsIntent)
+					} else {
+						awsELBHandler(listen, msg, awsIntent)
+					}
 				}
 
 				//if intent.Entity.Value == "pizza" && entity.Entity.Value != "" {
@@ -117,7 +128,7 @@ func awsEC2Handler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
 		for _, r := range ec2List.Reservations {
 			for c, i := range r.Instances {
 				for _, n := range i.NetworkInterfaces {
-					msg.ReplyMention("ip address for %s instance # %d: %v\n",
+					msg.ReplyMention("ip address for %s instance # %d: ```%v```",
 						e.EntityType.Entity.Value,
 						c+1,
 						*n.PrivateIpAddress)
@@ -125,7 +136,7 @@ func awsEC2Handler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
 			}
 		}
 	} else {
-		msg.ReplyMention("no instance with tag:Name %s found\n", e.EntityType.Entity.Value)
+		msg.ReplyMention("no instance with tag:Name ```%s``` found", e.EntityType.Entity.Value)
 	}
 	fmt.Printf("%s\n", ec2List.GoString())
 	listen.Close()
@@ -149,7 +160,32 @@ func awsEC2CountHandler(listen *slick.Listener, msg *slick.Message, e awsEntitie
 		}
 	}
 	fmt.Printf("total: %s\n", ec2List.Reservations)
-	msg.Reply("number of EC2 instances in running state is: %d", running)
-	msg.Reply("number of EC2 instances in pending state is: %d", pending)
+	msg.Reply("number of EC2 instances in running state is: ```%d```", running)
+	msg.Reply("number of EC2 instances in pending state is: ```%d```", pending)
+	listen.Close()
+}
+
+func awsELBHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	filter := awsELBFilter{
+		Tag:   "tag:Name",
+		Value: e.EntityType.Entity.Value,
+	}
+
+	elbList := getELBList(newELB(), filter)
+	for _, elb := range elbList.LoadBalancerDescriptions {
+		msg.ReplyMention("ELB %s :\n ```%s``` ", *elb.LoadBalancerName, elb)
+		fmt.Printf("%s\n", elbList.GoString())
+	}
+	listen.Close()
+}
+
+func awsELBCountHandler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	filter := awsELBFilter{
+		Tag:   "tag:Name",
+		Value: e.EntityType.Entity.Value,
+	}
+
+	elbList := getELBList(newELB(), filter)
+	msg.ReplyMention("# of ELBs in Sydney region ```%d```", len(elbList.LoadBalancerDescriptions))
 	listen.Close()
 }

@@ -1,18 +1,10 @@
 {
-    "memo": "a91d47e255a53955016897dccf42a29c300bcaec18edccbb425b150e9b50f895",
+    "memo": "1614c7738178dcf674c202e02d37a2731fc7237fd0dc6f6d154cf9c9b39b7815",
     "projects": [
         {
             "name": "github.com/abourget/slick",
             "branch": "master",
             "revision": "89aa9d5f1a911d6c5d34c076da2b239a205a31a3",
-            "packages": [
-                "."
-            ]
-        },
-        {
-            "name": "github.com/astaxie/beego",
-            "branch": "master",
-            "revision": "98740fddac7c5c0df83ea31b751a87e317d28163",
             "packages": [
                 "."
             ]
@@ -25,7 +17,8 @@
                 "aws",
                 "aws/awserr",
                 "aws/session",
-                "service/ec2"
+                "service/ec2",
+                "service/elb"
             ]
         },
         {

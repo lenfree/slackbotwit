@@ -1,7 +1,8 @@
 package awswit
 
 import (
-	"github.com/astaxie/beego"
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -49,9 +50,9 @@ func getEC2List(e *ec2.EC2, f awsEC2Filter) *ec2.DescribeInstancesOutput {
 
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
-			beego.Error(awsErr.Code(), awsErr.Message(), awsErr.OrigErr())
+			fmt.Printf("error %s %s %s", awsErr.Code(), awsErr.Message(), awsErr.OrigErr())
 			if reqErr, ok := err.(awserr.RequestFailure); ok {
-				beego.Error(
+				fmt.Printf("%s %s %d %s",
 					reqErr.Code(),
 					reqErr.Message(),
 					reqErr.StatusCode(),
