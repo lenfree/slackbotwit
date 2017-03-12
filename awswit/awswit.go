@@ -67,17 +67,18 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 				//	}()
 				//}
 				w := newWit(awswit.config.WitToken)
+
 				awsIntent := parse(query(w, msg.Text))
 
 				if strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true {
-					awsEC2Handler(listen, msg, awsIntent)
+					go awsEC2Handler(listen, msg, awsIntent)
 				}
 
 				if (strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true &&
 					strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) ||
 					(strings.Contains(awsIntent.Intent.Entity.Value, "number") == true &&
 						strings.Contains(awsIntent.EntityName.Entity.Value, "ec2") == true) {
-					awsEC2CountHandler(listen, msg, awsIntent)
+					go awsEC2CountHandler(listen, msg, awsIntent)
 				}
 
 				//if intent.Entity.Value == "pizza" && entity.Entity.Value != "" {
@@ -112,16 +113,19 @@ func awsEC2Handler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
 	}
 
 	ec2List := getEC2List(newEC2(), filter)
-
-	for _, r := range ec2List.Reservations {
-		for c, i := range r.Instances {
-			for _, n := range i.NetworkInterfaces {
-				msg.ReplyMention("ip address for %s instance # %d: %v\n",
-					e.EntityType.Entity.Value,
-					c+1,
-					*n.PrivateIpAddress)
+	if len(ec2List.Reservations) > 0 {
+		for _, r := range ec2List.Reservations {
+			for c, i := range r.Instances {
+				for _, n := range i.NetworkInterfaces {
+					msg.ReplyMention("ip address for %s instance # %d: %v\n",
+						e.EntityType.Entity.Value,
+						c+1,
+						*n.PrivateIpAddress)
+				}
 			}
 		}
+	} else {
+		msg.ReplyMention("no instance with tag:Name %s found\n", e.EntityType.Entity.Value)
 	}
 	fmt.Printf("%s\n", ec2List.GoString())
 	listen.Close()
