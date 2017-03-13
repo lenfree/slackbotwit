@@ -89,11 +89,11 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 						awsELBCountHandler(listen, msg, awsIntent)
 					}
 
-					if len(awsIntent.EntityType.Entity.Value) <= 0 {
+					if len(awsIntent.EntityType.Entity.Value) <= 0 && listNumberIntention == false {
 						awsELBHandler(listen, msg, awsIntent)
 					}
 
-					if len(awsIntent.EntityType.Entity.Value) > 0 {
+					if len(awsIntent.EntityType.Entity.Value) > 0 && listNumberIntention == false {
 						awsELBNameHandler(listen, msg, awsIntent)
 					}
 				}
@@ -138,6 +138,7 @@ func awsEC2Handler(listen *slick.Listener, msg *slick.Message, e awsEntities) {
 						e.EntityType.Entity.Value,
 						c+1,
 						*n.PrivateIpAddress)
+					continue
 				}
 			}
 		}
