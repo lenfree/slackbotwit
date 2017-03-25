@@ -2,13 +2,11 @@ package awswit
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/abourget/slick"
-	"github.com/joho/godotenv"
 )
 
 // AwsWit contains slick related configuration
@@ -23,17 +21,12 @@ var (
 
 //WitConfig contains awswit secrets
 type WitConfig struct {
-	WitToken string `json:"wit_token"`
+	WitToken  string `json:"wit_token"`
+	AWSRegion string `json:"aws_region"`
 }
 
 func init() {
 	slick.RegisterPlugin(&AwsWit{})
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Printf("Err: %s\n", err.Error())
-		os.Exit(1)
-	}
-	witToken = os.Getenv("WIT_TOKEN")
 }
 
 // InitPlugin registers this plugin
@@ -75,9 +68,11 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 
 					if strings.Contains(awsIntent.Intent.Entity.Value, "how many") == true ||
 						strings.Contains(awsIntent.Intent.Entity.Value, "number") == true {
-						awsEC2CountHandler(listen, msg, awsIntent)
-					} else {
-						awsEC2Handler(listen, msg, awsIntent)
+						go awsEC2CountHandler(listen, msg, awsIntent)
+					} else if strings.Contains(awsIntent.Property.Entity.Value, "tags") == true {
+						go awsEC2Tags(listen, msg, awsIntent)
+					} else if strings.Contains(awsIntent.Property.Entity.Value, "ip address") == true {
+						go awsEC2Handler(listen, msg, awsIntent)
 					}
 				}
 
@@ -86,15 +81,15 @@ func (awswit *AwsWit) ChatHandler(listen *slick.Listener, msg *slick.Message) {
 
 					listNumberIntention, _ := regexp.MatchString("number.*|how many", msg.Text)
 					if listNumberIntention == true {
-						awsELBCountHandler(listen, msg, awsIntent)
+						go awsELBCountHandler(listen, msg, awsIntent)
 					}
 
 					if len(awsIntent.EntityType.Entity.Value) <= 0 && listNumberIntention == false {
-						awsELBHandler(listen, msg, awsIntent)
+						go awsELBHandler(listen, msg, awsIntent)
 					}
 
 					if len(awsIntent.EntityType.Entity.Value) > 0 && listNumberIntention == false {
-						awsELBNameHandler(listen, msg, awsIntent)
+						go awsELBNameHandler(listen, msg, awsIntent)
 					}
 				}
 
@@ -193,6 +188,35 @@ func awsELBNameHandler(listen *slick.Listener, msg *slick.Message, e awsEntities
 		msg.ReplyMention("ELB ```%s`", elb.GoString())
 	} else {
 		msg.ReplyMention("ELB name %s not found", e.EntityType.Entity.Value)
+	}
+	listen.Close()
+}
+
+func awsEC2Tags(listen *slick.Listener, msg *slick.Message, e awsEntities) {
+	filter := awsEC2Filter{Tag: "", Value: ""}
+
+	var tags []string
+	ec2List := getEC2List(newEC2(), filter)
+	if len(ec2List.Reservations) > 0 {
+		for _, r := range ec2List.Reservations {
+			for _, i := range r.Instances {
+				for _, tag := range i.Tags {
+					switch *tag.Key {
+					case "Env":
+						continue
+					case "SaltEnv":
+						continue
+					default:
+						tags = append(tags, *tag.Key+" - "+*tag.Value)
+					}
+				}
+			}
+		}
+	}
+	for _, tag := range tags {
+		msg.ReplyMention("Key Value pair tag")
+		msg.ReplyMention("```%s```", tag)
+		time.Sleep(3 * time.Second)
 	}
 	listen.Close()
 }

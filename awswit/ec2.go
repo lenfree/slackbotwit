@@ -16,7 +16,7 @@ type awsEC2Filter struct {
 
 func newEC2() *ec2.EC2 {
 	return ec2.New(session.New(), &aws.Config{
-		Region: aws.String("ap-southeast-2"),
+		Region: aws.String("us-west-2"),
 	})
 }
 
